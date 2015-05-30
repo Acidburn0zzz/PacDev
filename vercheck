@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 repo="$1"
 pacbsd_path="$2"
 archlinux_path="$3"
