@@ -41,7 +41,7 @@ for i in "${pacbsd_path}/${repo}/"*; do
 		fi
 		check=$(vercmp "${pacbsdpkgver}" "${linuxpkgver}")
 		if [ "${check}" -lt "0" ]; then
-			echo "${i} needs updating: PacBSD: ${pacpkgver} ArchLinux: ${linuxpkgver}"
+			echo "${i} needs updating: PacBSD: ${pacbsdpkgver} ArchLinux: ${linuxpkgver}"
 		fi
 		unset check
 
