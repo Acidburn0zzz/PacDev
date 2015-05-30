@@ -27,6 +27,8 @@ update_linux_abs() {
 for i in "${pacbsd_path}/${repo}/"*; do
 	unset absdpkgver
 	unset linuxpkgver
+	update_linux_abs
+
 	if [ -d "${i}" ]; then
 		source "${i}/PKGBUILD"
 		pacbsdpkgver="${pkgver}"
