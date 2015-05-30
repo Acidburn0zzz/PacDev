@@ -16,18 +16,15 @@ if [ ! -d "${pacbsd_path}/${repo}" ]; then
 	die "No such repo ${repo} in PacBSD tree"
 fi
 
-update_linux_abs() {
-	if [ ! -e /usr/bin/abs ]; then
-		die "abs tool is not installed. Run 'pacman -s abs'"
-	else
-		su root -c abs "${repo}"
-	fi
-}
+if [ ! -e /usr/bin/abs ]; then
+	die "abs tool is not installed. Run 'pacman -s abs'"
+else
+	su root -c abs "${repo}"
+fi
 
 for i in "${pacbsd_path}/${repo}/"*; do
 	unset absdpkgver
 	unset linuxpkgver
-	update_linux_abs
 
 	if [ -d "${i}" ]; then
 		source "${i}/PKGBUILD"
