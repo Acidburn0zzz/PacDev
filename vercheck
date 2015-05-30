@@ -20,7 +20,7 @@ update_linux_abs() {
 	if [ ! -e /usr/bin/abs ]; then
 		die "abs tool is not installed. Run 'pacman -s abs'"
 	else
-		abs "${repo}"
+		su root -c abs "${repo}"
 	fi
 }
 
