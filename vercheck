@@ -1,0 +1,48 @@
+repo="$1"
+pacbsd_path="$2"
+archlinux_path="$3"
+
+die() {
+    echo "$@"
+    exit 1
+}
+
+if [ -z "${repo}" ] || [ -z "${pacbsd_path}" ] || [ -z "${archlinux_path}" ] ; then
+	echo "usage: $0 repository PacBSD_tree ArchLinux_tree"
+	exit
+fi
+
+if [ ! -d "${pacbsd_path}/${repo}" ]; then
+	die "No such repo ${repo} in PacBSD tree"
+fi
+
+update_linux_abs() {
+	if [ ! -e /usr/bin/abs ]; then
+		die "abs tool is not installed. Run 'pacman -s abs'"
+	else
+		abs "${repo}"
+	fi
+}
+
+for i in "${pacbsd_path}/${repo}/"*; do
+	unset absdpkgver
+	unset linuxpkgver
+	if [ -d "${i}" ]; then
+		source "${i}/PKGBUILD"
+		pacbsdpkgver="${pkgver}"
+		unset pkgver
+		if [ -d "${archlinux_path}/${repo}/${i##*/}" ]; then
+			source "${archlinux_path}/${repo}/${i##*/}/PKGBUILD"
+			linuxpkgver="${pkgver}"
+			unset pkgver
+		else
+			continue
+		fi
+		check=$(vercmp "${pacbsdpkgver}" "${linuxpkgver}")
+		if [ "${check}" -lt "0" ]; then
+			echo "${i} needs updating: PacBSD: ${absdpkgver} ArchLinux: ${linuxpkgver}"
+		fi
+		unset check
+
+	fi
+done
