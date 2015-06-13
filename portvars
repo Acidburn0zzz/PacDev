@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+port_path=$1
+
+##
+## Colorise the text so it's easier too read
+##
+green=$(tput setaf 2)
+purple=$(tput setaf 5)
+normal=$(tput sgr0)
+
+if [ -z ${port_path} ];then
+	echo "Please specify the port directory. e.g /usr/ports/ftp/curl"
+	exit 1
+fi
+
+if [ ! -d ${port_path} ]; then
+	echo "Can't find port"
+	exit 1
+fi
+
+
+for x in MAKE_ENV CONFIGURE_ENV MAKE_ARGS; do
+	echo "Variables defined in ${purple}${x}${normal}"
+	echo "${green}>>>${normal}"
+	make -V ${x} -f ${port_path}/Makefile 
+	echo "${green}>>>${normal}"
+done
+
