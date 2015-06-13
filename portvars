@@ -20,7 +20,7 @@ if [ ! -d ${port_path} ]; then
 fi
 
 
-for x in MAKE_ENV CONFIGURE_ENV MAKE_ARGS; do
+for x in MAKE_ENV CONFIGURE_ENV MAKE_ARGS CONFIGURE_ARGS; do
 	echo "Variables defined in ${purple}${x}${normal}"
 	echo "${green}>>>${normal}"
 	make -V ${x} -f ${port_path}/Makefile 
