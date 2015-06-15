@@ -12,7 +12,7 @@ normal=$(tput sgr0)
 check_broken() {
 	local _pkg="$1"
 	if ( grep -q "${_pkg} " /tmp/${brokenFile} ); then
-		echo "${_pkg} is in ${brokenFile}"
+		echo "${_pkg} is broken."
 	fi
 
 }
@@ -20,7 +20,7 @@ check_broken() {
 check_version() {
 	local _pkg=$1
 	if ( grep -q "/${_pkg} " /tmp/${versionFile} ); then
-		echo "${_pkg} is in ${versionFile}"
+		echo "${_pkg} is outdated."
 	fi
 
 }
