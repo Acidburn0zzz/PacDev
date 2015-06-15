@@ -32,6 +32,14 @@ _msg() {
 	echo "${green}#################################${normal}"
 }
 
+_msg2() {
+        local mesg=$1; shift
+        echo "${green}#################################${normal}"
+        echo "${red}${mesg}${normal}: ${makedepends[@]}"
+        echo "${green}#################################${normal}"
+}
+
+
 if [ ! -f PKGBUILD ];then
 	echo "No PKGBUILD found"
 else
@@ -41,19 +49,15 @@ else
 		check_broken "${dep%%[<>=]*}"
 	done
 
-	_msg "makedepends"
-
-        for dep in ${makedepends[@]}; do
-                check_broken "${dep%%[<>=]*}"                            
-        done
-
-	_msg "Version depends"
+	_msg2 "makedepends"
 
 	for dep in ${depends[@]}; do
 		check_version "${dep%%[<>=]*}"
 	done
 
-	_msg "Version makedepends"
+        for dep in ${makedepends[@]}; do
+                check_broken "${dep%%[<>=]*}"                            
+        done
 
 	for dep in ${makedepends[@]}; do
 		check_version "${dep%%[<>=]*}"
