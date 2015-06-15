@@ -2,8 +2,8 @@
 versionFile=versionCheck.txt
 brokenFile=broken_quiet.txt
 url=http://users.pacbsd.org/~repo/repo-report/current
-fetch ${url}/${brokenFile} -o /tmp/${brokenFile}
-fetch ${url}/${versionFile} -o /tmp/${versionFile}
+fetch -q ${url}/${brokenFile} -o /tmp/${brokenFile}
+fetch -q ${url}/${versionFile} -o /tmp/${versionFile}
 
 green=$(tput setaf 2)
 red=$(tput setaf 1) 
@@ -11,7 +11,7 @@ normal=$(tput sgr0)
 
 check_broken() {
 	local _pkg="$1"
-	if ( grep -q "${_pkg} " /tmp/${brokenFile} ); then
+	if ( grep -q "${_pkg}$" /tmp/${brokenFile} ); then
 		echo "${_pkg} is broken."
 	fi
 
@@ -49,11 +49,11 @@ else
 		check_broken "${dep%%[<>=]*}"
 	done
 
-	_msg2 "makedepends"
-
 	for dep in ${depends[@]}; do
 		check_version "${dep%%[<>=]*}"
 	done
+
+	_msg2 "makedepends"
 
         for dep in ${makedepends[@]}; do
                 check_broken "${dep%%[<>=]*}"                            
