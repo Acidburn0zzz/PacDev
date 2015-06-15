@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+versionFile=versionCheck.txt
+brokenFile=broken_quiet.txt
+url=http://users.pacbsd.org/~repo/repo-report/current
+fetch ${url}/${brokenFile} -o /tmp/${brokenFile}
+fetch ${url}/${versionFile} -o /tmp/${versionFile}
+
+green=$(tput setaf 2)
+red=$(tput setaf 1) 
+normal=$(tput sgr0)
+
+check_broken() {
+	local _pkg="$1"
+	if ( grep -q "${_pkg} " /tmp/${brokenFile} ); then
+		echo "${_pkg} is in ${brokenFile}"
+	fi
+
+}
+
+check_version() {
+	local _pkg=$1
+	if ( grep -q "/${_pkg} " /tmp/${versionFile} ); then
+		echo "${_pkg} is in ${versionFile}"
+	fi
+
+}
+
+_msg() {
+	local mesg=$1; shift
+	echo "${green}#################################${normal}"
+	echo "${red}${mesg}${normal}: ${depends[@]}"
+	echo "${green}#################################${normal}"
+}
+
+if [ ! -f PKGBUILD ];then
+	echo "No PKGBUILD found"
+else
+	source PKGBUILD
+	_msg "depends"
+	for dep in ${depends[@]}; do
+		check_broken "${dep%%[<>=]*}"
+	done
+
+	_msg "makedepends"
+
+        for dep in ${makedepends[@]}; do
+                check_broken "${dep%%[<>=]*}"                            
+        done
+
+	_msg "Version depends"
+
+	for dep in ${depends[@]}; do
+		check_version "${dep%%[<>=]*}"
+	done
+
+	_msg "Version makedepends"
+
+	for dep in ${makedepends[@]}; do
+		check_version "${dep%%[<>=]*}"
+	done
+
+	unset depends makedepends
+
+fi
