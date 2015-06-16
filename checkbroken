@@ -20,7 +20,7 @@ check_broken() {
 			echo "${_pkg} is provided by ${_prov} which is broken"
 		fi
 	else
-		if ( grep -q "${_pkg}$" /tmp/${brokenFile} ); then
+		if ( grep -q "^${_pkg}$" /tmp/${brokenFile} ); then
 			echo "${_pkg} is broken."
 		fi
 	fi
