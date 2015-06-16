@@ -11,18 +11,32 @@ normal=$(tput sgr0)
 
 check_broken() {
 	local _pkg="$1"
-	if ( grep -q "${_pkg}$" /tmp/${brokenFile} ); then
-		echo "${_pkg} is broken."
+	local _prov="$1"
+	if (is_a_provide -v "$_prov"); then
+		_prov=$(is_a_provide -p "$_prov" | head -1)
+		if ( grep -q "${_prov}$" /tmp/${brokenFile} ); then
+			echo "${_pkg is provided by ${_prov} which is broken"
+		fi
+	else
+		if ( grep -q "${_pkg}$" /tmp/${brokenFile} ); then
+			echo "${_pkg} is broken."
+		fi
 	fi
 
 }
 
 check_version() {
 	local _pkg=$1
-	if ( grep -q "/${_pkg} " /tmp/${versionFile} ); then
-		echo "${_pkg} is outdated."
+	local _prov="$1"
+        if (is_a_provide -v "$_prov"); then
+		_prov=$(is_a_provide -p "$_prov" | head -1)
+		if ( grep -q "${_prov}$" /tmp/${versionFile} ); then
+			echo "${_pkg is provided by ${_prov} which is outdated"
+		fi
+	else
+		if ( grep -q "/${_pkg} " /tmp/${versionFile} ); then
+			echo "${_pkg} is outdated."
 	fi
-
 }
 
 _msg() {

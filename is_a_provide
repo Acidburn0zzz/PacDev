@@ -3,10 +3,10 @@ return_value() {
 		if [[ "$i" != "${pkg}" ]]; then 
 			# if the pkgname doesn't match the pkgname searched
 			# it generally means it is provided by that package
-			exit 1
+			exit 0
 		fi; 
 	done
-	exit 0
+	exit 1
 }
 
 return_pkg() {
