@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
+
 versionFile=versionCheck.txt
 brokenFile=broken_quiet.txt
 url=http://users.pacbsd.org/~repo/repo-report/current
+
 fetch -q ${url}/${brokenFile} -o /tmp/${brokenFile}
 fetch -q ${url}/${versionFile} -o /tmp/${versionFile}
 
 green=$(tput setaf 2)
-red=$(tput setaf 1) 
+red=$(tput setaf 1)
 normal=$(tput sgr0)
 
 check_broken() {
@@ -15,7 +17,7 @@ check_broken() {
 	if (is_a_provide -v "$_prov"); then
 		_prov=$(is_a_provide -p "$_prov" | head -1)
 		if ( grep -q "${_prov}$" /tmp/${brokenFile} ); then
-			echo "${_pkg is provided by ${_prov} which is broken"
+			echo "${_pkg} is provided by ${_prov} which is broken"
 		fi
 	else
 		if ( grep -q "${_pkg}$" /tmp/${brokenFile} ); then
@@ -26,16 +28,17 @@ check_broken() {
 }
 
 check_version() {
-	local _pkg=$1
+	local _pkg="$1"
 	local _prov="$1"
         if (is_a_provide -v "$_prov"); then
 		_prov=$(is_a_provide -p "$_prov" | head -1)
 		if ( grep -q "${_prov}$" /tmp/${versionFile} ); then
-			echo "${_pkg is provided by ${_prov} which is outdated"
+			echo "${_pkg} is provided by ${_prov} which is outdated"
 		fi
 	else
 		if ( grep -q "/${_pkg} " /tmp/${versionFile} ); then
 			echo "${_pkg} is outdated."
+		fi
 	fi
 }
 
@@ -70,7 +73,7 @@ else
 	_msg2 "makedepends"
 
         for dep in ${makedepends[@]}; do
-                check_broken "${dep%%[<>=]*}"                            
+                check_broken "${dep%%[<>=]*}"
         done
 
 	for dep in ${makedepends[@]}; do

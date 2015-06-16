@@ -1,5 +1,6 @@
+#!/usr/bin/env bash
 return_value() {
-	for i in $(pacman -Ssq ^${pkg}$); do 
+	for i in $(pacman -Ssq ^"${pkg}"$); do 
 		if [[ "$i" != "${pkg}" ]]; then 
 			# if the pkgname doesn't match the pkgname searched
 			# it generally means it is provided by that package
@@ -10,7 +11,7 @@ return_value() {
 }
 
 return_pkg() {
-	for i in $(pacman -Ssq ^${pkg}$); do
+	for i in $(pacman -Ssq ^"${pkg}"$); do
 		if [[ "$i" != "${pkg}" ]]; then
 			echo "$i";
 		fi
@@ -27,11 +28,11 @@ EOF
 while getopts p:v: args; do
 	case ${args} in
 		p)
-			pkg=${OPTARG}
+			pkg="${OPTARG}"
 			return_pkg
 			;;
 		v)
-			pkg=${OPTARG}
+			pkg="${OPTARG}"
 			return_value
 			;;
 		*)
