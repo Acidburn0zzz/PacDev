@@ -1,0 +1,42 @@
+return_value() {
+	for i in $(pacman -Ssq ^${pkg}$); do 
+		if [[ "$i" != "${pkg}" ]]; then 
+			# if the pkgname doesn't match the pkgname searched
+			# it generally means it is provided by that package
+			exit 1
+		fi; 
+	done
+	exit 0
+}
+
+return_pkg() {
+	for i in $(pacman -Ssq ^${pkg}$); do
+		if [[ "$i" != "${pkg}" ]]; then
+			echo "$i";
+		fi
+	done
+}
+
+show_help() {
+	cat << EOF
+	-p                     Return Package strings
+	-v                     return 1 if provide 0 if not
+EOF
+}
+
+while getopts p:v: args; do
+	case ${args} in
+		p)
+			pkg=${OPTARG}
+			return_pkg
+			;;
+		v)
+			pkg=${OPTARG}
+			return_value
+			;;
+		*)
+			show_help
+			;;
+	esac
+done
+
