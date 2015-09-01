@@ -7,21 +7,41 @@ url=http://users.pacbsd.org/~repo/repo-report/current
 fetch -q ${url}/${brokenFile} -o /tmp/${brokenFile}
 fetch -q ${url}/${versionFile} -o /tmp/${versionFile}
 
-green=$(tput setaf 2)
-red=$(tput setaf 1)
-normal=$(tput sgr0)
+show_help() {
+	cat << EOF
+	-q    quiet            Return nothing but 1 or 0 as output
+EOF
+}
+
+while getopts q args; do
+  case ${args} in
+    q)
+		return_quiet="0"
+                ;;
+    *)
+		show_help
+		;;
+  esac
+done
 
 check_broken() {
 	local _pkg="$1"
 	local _prov="$1"
+	unset broken_found
 	if (is_a_provide -v "$_prov"); then
 		_prov=$(is_a_provide -p "$_prov" | head -1)
-		if ( grep -q "${_prov}$" /tmp/${brokenFile} ); then
-			echo "${_pkg} is provided by ${_prov} which is broken"
+		if ( grep -q "^${_prov}$" /tmp/${brokenFile} ); then
+				broken_found=0
+			if [ -z "${return_quiet}" ]; then
+				echo "${_pkg} is provided by ${_prov} which is broken"
+			fi
 		fi
 	else
 		if ( grep -q "^${_pkg}$" /tmp/${brokenFile} ); then
-			echo "${_pkg} is broken."
+				broken_found=0
+			if [ -z "${return_quiet}" ]; then
+				echo "${_pkg} is broken."
+			fi
 		fi
 	fi
 
@@ -30,56 +50,62 @@ check_broken() {
 check_version() {
 	local _pkg="$1"
 	local _prov="$1"
+	unset outdated_found
         if (is_a_provide -v "$_prov"); then
 		_prov=$(is_a_provide -p "$_prov" | head -1)
-		if ( grep -q "${_prov}$" /tmp/${versionFile} ); then
-			echo "${_pkg} is provided by ${_prov} which is outdated"
+		if ( grep -q "/${_prov}$" /tmp/${versionFile} ); then
+				outdated_found="0"
+			if [ -z "${return_quiet}" ]; then
+				echo "${_pkg} is provided by ${_prov} which is outdated"
+			fi
 		fi
 	else
 		if ( grep -q "/${_pkg} " /tmp/${versionFile} ); then
-			echo "${_pkg} is outdated."
+				outdated_found="0"
+			if [ -z "${return_quiet}" ]; then
+				echo "${_pkg} is outdated."
+			fi
 		fi
 	fi
 }
 
-_msg() {
-	local mesg=$1; shift
-	echo "${green}#################################${normal}"
-	echo "${red}${mesg}${normal}: ${depends[@]}"
-	echo "${green}#################################${normal}"
-}
-
-_msg2() {
-        local mesg=$1; shift
-        echo "${green}#################################${normal}"
-        echo "${red}${mesg}${normal}: ${makedepends[@]}"
-        echo "${green}#################################${normal}"
-}
-
-
 if [ ! -f PKGBUILD ];then
-	echo "No PKGBUILD found"
+	echo "No PKGBUILD found" && exit 1
 else
 	source PKGBUILD
-	_msg "depends"
-	for dep in ${depends[@]}; do
-		check_broken "${dep%%[<>=]*}"
+
+	for x in "depends" "makedepends" "checkdepends"; do
+		for z in "check_broken" "check_version"; do
+			if [ -z "${return_quiet}" ]; then
+				echo "Checking ${x} with ${z}"
+			fi
+				case "${x}" in
+					depends)
+						for dep in "${depends[@]}"; do
+					                "${z}" "${dep%%[<>=]*}"
+								if [ -n "${outdated_found}" ] || [ -n "${broken_found}" ];then
+									return_val=1
+								fi
+					        done
+						;;
+					makedepends)
+						for dep in "${makedepends[@]}"; do
+							"${z}" "${dep%%[<>=]*}"
+								if [ -n "${outdated_found}" ] || [ -n "${broken_found}" ];then
+									return_val=1
+								fi
+						done
+						;;
+					optdepends)
+						for dep in "${optdepends[@]}"; do
+							"${z}" "${dep%%[<>=]*}"
+						done
+						;;
+				esac
+		done
 	done
+fi
 
-	for dep in ${depends[@]}; do
-		check_version "${dep%%[<>=]*}"
-	done
-
-	_msg2 "makedepends"
-
-        for dep in ${makedepends[@]}; do
-                check_broken "${dep%%[<>=]*}"
-        done
-
-	for dep in ${makedepends[@]}; do
-		check_version "${dep%%[<>=]*}"
-	done
-
-	unset depends makedepends
-
+if [ -n "${return_val}" ];then
+	exit 1
 fi

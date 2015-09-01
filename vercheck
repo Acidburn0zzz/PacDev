@@ -37,6 +37,21 @@ for i in "${pacbsd_path}/${repo}/"*; do
 			linuxpkgver="${pkgver}"
 			unset pkgver
 		else
+			## check in other repo incase they're different
+			for i in core extra community; do
+				#skip the repo in $repo
+				if [ "${i}" == "${repo}" ]; then
+					continue
+				else
+					if [ -d "${archlinux_path}/${i}/${i##*/}" ]; then
+						source "${archlinux_path}/${i}/${i##*/}/PKGBUILD"
+						linuxpkgver="${pkgver}"
+						unset pkgver
+						# break, no point in continuing the loop
+						break
+					fi
+				fi
+			done
 			continue
 		fi
 		check=$(vercmp "${pacbsdpkgver}" "${linuxpkgver}")
